@@ -31,12 +31,19 @@ riscv64:
 
     wget https://pkgs.tailscale.com/stable/tailscale_1.76.1_riscv64.tgz
 
+**Find out more packages at "Static binaries (other distros)"**
+
+https://pkgs.tailscale.com/stable/#static
+
+
 
 **Next step is to unarchieve the downloaded file, carefully choose the right file name**
 
     tar -xf <File Name>
+example: tar -xf tailscale_1.76.1_arm64.tgz
 
-    cd <File Name Folder>
+    cd <File Name Directory>
+example: cd tailscale_1.76.1_arm64
 
 **Create a new directory "tailscale" in share/userdata folder**
 

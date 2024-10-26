@@ -121,5 +121,5 @@ example: cd tailscale_1.76.1_arm64
 
 **go to tailscale admin page, review your machine and enable "subnet routes" by selecting your CIDR**
 
-**now you can access your rom files, copy/paste/delete or ssh remotely if you have tailscale running in the remote computer/device using same tailscale account**
+**now you can access your rom files, copy/paste/delete or ssh remotely if you have tailscale running in the remote computer/device using same tailscale account or by sharing your machine to your friends who has a tailscale account**
 

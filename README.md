@@ -1,2 +1,118 @@
-# batocera-tailscale
-Run Tailscale in batocera with Subnet and Accept Accept which starts at boot to access file share remotely
+# Batocera-Tailscale
+**Run Tailscale in batocera with Subnet and Accept Routes, tailscale starts at boot so you can access "share folder" or "ssh" service remotely**
+
+*Batocera comes with pre-enabled ssh, login using (**username:root and password:linux**)*
+
+**Create a temp folder**
+
+    mkdir /userdata/temp
+    cd /userdata/temp
+
+**Download appropriate file as per your system architecture
+details available in Batocera "SYSTEM SETTINGS > INFORMATION > ARCHITECTURE (example: armv7l)**
+
+arm/v7:
+
+    wget https://pkgs.tailscale.com/stable/tailscale_1.76.1_arm.tgz
+
+arm64/v8:
+
+    wget https://pkgs.tailscale.com/stable/tailscale_1.76.1_arm64.tgz
+
+amd64:
+
+    wget https://pkgs.tailscale.com/stable/tailscale_1.76.1_amd64.tgz
+
+x86:
+
+    wget https://pkgs.tailscale.com/stable/tailscale_1.76.1_386.tgz
+
+riscv64:
+
+    wget https://pkgs.tailscale.com/stable/tailscale_1.76.1_riscv64.tgz
+
+
+**Next step is to unarchieve the downloaded file, carefully choose the right file name**
+
+    tar -xf <File Name>
+
+    cd <File Name Folder>
+
+**Create a new directory "tailscale" in share/userdata folder**
+
+    mkdir /userdata/tailscale
+
+***Now move systemd, talscale and tailscaled to /userdata/tailscale***
+
+    mv systemd /userdata/tailscale/systemd
+    mv tailscale /userdata/tailscale/tailscale
+    mv tailscaled /userdata/tailscale/tailscaled
+    cd /userdata
+    rm -rf temp
+
+***Create service/script directory***
+
+    mkdir /userdata/system/services
+    touch /userdata/system/services/tailscale
+    nano /userdata/system/services/tailscale
+
+***Since batocera reverts "sysctl" to default with every reboot, we need to add some new lines on top of custom.sh lines given in batocera-vpn documentation***
+
+***Paste these line and change your network CIDR "example: --advertise-routes=192.168.1.0/24"***
+
+    #!/bin/bash
+    if test "$1" != "start"
+    then
+      exit 0
+    fi
+    
+    if [ ! -d /dev/net ]; then
+      mkdir -p /dev/net
+      mknod /dev/net/tun c 10 200
+      chmod 600 /dev/net/tun
+      rm -rf sysctl.conf
+      touch sysctl.conf
+      echo 'net.ipv4.ip_forward = 0' | tee -a /etc/sysctl.conf
+      echo 'net.ipv6.conf.all.forwarding = 0' | tee -a /etc/sysctl.conf
+      sysctl -p /etc/sysctl.conf
+      rm -rf sysctl.conf
+      touch sysctl.conf
+      echo 'net.ipv4.ip_forward = 1' | tee -a /etc/sysctl.conf
+      echo 'net.ipv6.conf.all.forwarding = 1' | tee -a /etc/sysctl.conf
+      sysctl -p /etc/sysctl.conf
+    fi
+    /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up --advertise-routes=192.168.1.0/24 --snat-subnet-routes=false --accept-routes
+
+
+# Now Activate your TailScale
+
+***Paste this line in ssh command***
+
+    /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
+
+****If it does not give you a login link then run it again****
+
+***Login to your tailscale with the given link and activate your batocera machine***
+
+***After login check tailscale IP in your machine***
+
+    ip a
+
+***if you see tailscale ip then only proceed further, else you have made a mistake somewhere above***
+
+**Now Activate Batocera Service/Script to start with booth**
+
+    batocera-services list
+    batocera-services enable tailscale
+    reboot
+
+**Wait for the machine to start and check your machine's IP**
+
+    ip a
+
+***you must have tailscale ip in the list***
+
+**go to tailscale admin page, review your machine and enable "subnet routes" by selecting your CIDR**
+
+**now you can access your rom files, copy/paste/delete or ssh remotely if you have tailscale running in the remote computer/device using same tailscale account**
+

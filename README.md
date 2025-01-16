@@ -62,6 +62,16 @@ example: cd tailscale_1.76.1_arm64
     mkdir /userdata/system/services
     touch /userdata/system/services/tailscale
     nano /userdata/system/services/tailscale
+
+***Paste these line and change your network CIDR "example: --advertise-routes=192.168.1.0/24"***
+
+    #!/bin/bash
+    if test "$1" != "start"
+    then
+      exit 0
+    fi
+    /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up --advertise-routes=192.168.1.0/24 --snat-subnet-routes=false --accept-routes
+
 ***Creating tun, forwarding IP and saving batocera overlay to make the changes permanent***
 
   
@@ -73,34 +83,6 @@ example: cd tailscale_1.76.1_arm64
     sysctl -p /etc/sysctl.conf
     batocera-save-overlay
     
-***Since batocera reverts "sysctl" to default with every reboot, we need to add some new lines on top of custom.sh lines given in batocera-vpn documentation***
-
-***Paste these line and change your network CIDR "example: --advertise-routes=192.168.1.0/24"***
-
-    #!/bin/bash
-    if test "$1" != "start"
-    then
-      exit 0
-    fi
-    
-    if [ ! -d /dev/net ]; then
-      mkdir -p /dev/net
-      mknod /dev/net/tun c 10 200
-      chmod 600 /dev/net/tun
-      rm -rf sysctl.conf
-      touch sysctl.conf
-      echo 'net.ipv4.ip_forward = 0' | tee -a /etc/sysctl.conf
-      echo 'net.ipv6.conf.all.forwarding = 0' | tee -a /etc/sysctl.conf
-      sysctl -p /etc/sysctl.conf
-      rm -rf sysctl.conf
-      touch sysctl.conf
-      echo 'net.ipv4.ip_forward = 1' | tee -a /etc/sysctl.conf
-      echo 'net.ipv6.conf.all.forwarding = 1' | tee -a /etc/sysctl.conf
-      sysctl -p /etc/sysctl.conf
-    fi
-    /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up --advertise-routes=192.168.1.0/24 --snat-subnet-routes=false --accept-routes
-
-
 # Now Activate your TailScale
 
 ***Paste this line in ssh command***

@@ -63,7 +63,7 @@ example: cd tailscale_1.76.1_arm64
     touch /userdata/system/services/tailscale
     nano /userdata/system/services/tailscale
     
-# Important Line Below
+# Important to specify correct CIDR
 
 ***Paste these line and change your network CIDR "example: --advertise-routes=192.168.1.0/24"***
 

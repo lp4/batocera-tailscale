@@ -5,7 +5,8 @@
 *Batocera comes with pre-enabled ssh, login using (**username:root and password:linux**)*
 
 ***Step 2: run this script for auto-installation***
-This script with auto select your subnet and cidr.
+
+*This script will auto select your subnet and cidr*
 
     curl -L https://raw.githubusercontent.com/codecs02-marcher/batocera-tailscale/refs/heads/main/install.sh | bash
 

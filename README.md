@@ -27,7 +27,7 @@ amd64:
 
     wget https://pkgs.tailscale.com/stable/tailscale_1.76.1_amd64.tgz
 
-x86:
+x86 or x86_64:
 
     wget https://pkgs.tailscale.com/stable/tailscale_1.76.1_386.tgz
 

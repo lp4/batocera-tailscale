@@ -62,10 +62,6 @@ example: cd tailscale_1.76.1_arm64
     mkdir /userdata/system/services
     touch /userdata/system/services/tailscale
     nano /userdata/system/services/tailscale
-    
-# Important to specify correct CIDR
-
-***My batocera ip address is 192.168.1.102 so my CIDR is 192.168.1.0/24***
 
 ***Paste these line and change your network CIDR "example: --advertise-routes=192.168.1.0/24 or --advertise-routes=192.168.0.0/24 or --advertise-routes=xxx.xxx.xxx.0/xx" depends on what subnet you use***
 
@@ -75,6 +71,12 @@ example: cd tailscale_1.76.1_arm64
       exit 0
     fi
     /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up --advertise-routes=192.168.1.0/24 --snat-subnet-routes=false --accept-routes
+    
+# Important to specify correct CIDR
+
+***My batocera ip address is 192.168.1.102 so my CIDR is 192.168.1.0/24***
+
+# Making changes to system
 
 ***Creating tun, forwarding IP and saving batocera overlay to make the changes permanent***
 

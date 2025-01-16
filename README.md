@@ -82,9 +82,8 @@ example: cd tailscale_1.76.1_arm64
     chmod 600 /dev/net/tun
     echo 'net.ipv4.ip_forward = 1' | tee -a /etc/sysctl.conf
     echo 'net.ipv6.conf.all.forwarding = 1' | tee -a /etc/sysctl.conf
-    sysctl -p /etc/sysctl.conf
     batocera-save-overlay
-    
+
 # Now Activate your TailScale
 
 ***Paste this line in ssh command***

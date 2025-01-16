@@ -13,7 +13,7 @@
     lscpu | grep -oP 'Architecture:\s*\K.+'
    
 **Download appropriate file as per your system architecture
-details available in Batocera "SYSTEM SETTINGS > INFORMATION > ARCHITECTURE (example: armv7l)**
+details available in Batocera "SYSTEM SETTINGS > INFORMATION > ARCHITECTURE (example: armv7l or aarch64 or x86_64)**
 
 arm/v7 or aarch32:
 

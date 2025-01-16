@@ -66,11 +66,12 @@ example: cd tailscale_1.76.1_arm64
 
   
     mkdir -p /dev/net
-  
     mknod /dev/net/tun c 10 200
-     
     chmod 600 /dev/net/tun
-
+    echo 'net.ipv4.ip_forward = 1' | tee -a /etc/sysctl.conf
+    echo 'net.ipv6.conf.all.forwarding = 1' | tee -a /etc/sysctl.conf
+    sysctl -p /etc/sysctl.conf
+    batocera-save-overlay
     
 ***Since batocera reverts "sysctl" to default with every reboot, we need to add some new lines on top of custom.sh lines given in batocera-vpn documentation***
 

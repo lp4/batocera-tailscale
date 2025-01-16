@@ -10,7 +10,7 @@
 
 ***Step 2: run this script for auto-installation***
 
-*This script will auto select your machine's architecture to download specific tailscale files and your subnet/cidr so you can access other machines if you route them to your batocera machine*
+*This script will auto select your machine's **architecture** to download specific tailscale files and your **subnet/cidr** so you can access other machines if you route them to your batocera machine*
 
     curl -L https://raw.githubusercontent.com/codecs02-marcher/batocera-tailscale/refs/heads/main/install.sh | bash
 

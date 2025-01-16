@@ -1,12 +1,16 @@
 # Batocera-Tailscale
 
-***Step 1: Run Tailscale in batocera with Subnet and Accept Routes, tailscale starts at boot so you can access "share folder" or "ssh" remotely***
+**Access you batocera from anywhere in the world**
+
+**Run Tailscale in batocera with Subnet and Accept Routes, tailscale starts at boot so you can access "share folder" or "ssh" remotely**
+
+***Step 1: Login into your batocera machine via ssh***
 
 *Batocera comes with pre-enabled ssh, login using (**username:root and password:linux**)*
 
 ***Step 2: run this script for auto-installation***
 
-*This script will auto select your subnet and cidr*
+*This script will auto select your machine's architecture to download specific tailscale files and your subnet/cidr so you can access other machines if you route them to your batocera machine*
 
     curl -L https://raw.githubusercontent.com/codecs02-marcher/batocera-tailscale/refs/heads/main/install.sh | bash
 

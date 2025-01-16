@@ -10,7 +10,7 @@
 
 **To find out your batocera architecture run this command**
 
-    lscpu | grep -oP 'Architecture:\s*\K.+'
+    batocera-info | grep -oP 'Architecture:\s*\K.+'
 
 or
 

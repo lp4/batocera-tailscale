@@ -11,6 +11,10 @@
 **To find out your batocera architecture run this command**
 
     lscpu | grep -oP 'Architecture:\s*\K.+'
+
+or
+
+    uname -m
    
 **Download appropriate file as per your system architecture
 details available in Batocera "SYSTEM SETTINGS > INFORMATION > ARCHITECTURE (example: armv7l or aarch64 or x86_64)**

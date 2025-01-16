@@ -1,5 +1,6 @@
 # Batocera-Tailscale
-**Step 1: Run Tailscale in batocera with Subnet and Accept Routes, tailscale starts at boot so you can access "share folder" or "ssh" remotely**
+
+***Step 1: Run Tailscale in batocera with Subnet and Accept Routes, tailscale starts at boot so you can access "share folder" or "ssh" remotely***
 
 *Batocera comes with pre-enabled ssh, login using (**username:root and password:linux**)*
 

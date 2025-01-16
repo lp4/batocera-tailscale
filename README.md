@@ -15,11 +15,11 @@
 **Download appropriate file as per your system architecture
 details available in Batocera "SYSTEM SETTINGS > INFORMATION > ARCHITECTURE (example: armv7l)**
 
-arm/v7:
+arm/v7 or aarch32:
 
     wget https://pkgs.tailscale.com/stable/tailscale_1.76.1_arm.tgz
 
-arm64/v8:
+arm64/v8 or aarch64:
 
     wget https://pkgs.tailscale.com/stable/tailscale_1.76.1_arm64.tgz
 

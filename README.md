@@ -8,6 +8,10 @@
     mkdir /userdata/temp
     cd /userdata/temp
 
+**to find out your batocera architecture run this command**
+
+   lscpu | grep -oP 'Architecture:\s*\K.+'
+   
 **Download appropriate file as per your system architecture
 details available in Batocera "SYSTEM SETTINGS > INFORMATION > ARCHITECTURE (example: armv7l)**
 

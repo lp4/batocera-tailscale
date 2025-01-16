@@ -8,7 +8,7 @@
     mkdir /userdata/temp
     cd /userdata/temp
 
-**to find out your batocera architecture run this command**
+**To find out your batocera architecture run this command**
 
     lscpu | grep -oP 'Architecture:\s*\K.+'
    

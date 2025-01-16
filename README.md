@@ -62,7 +62,7 @@ example: cd tailscale_1.76.1_arm64
     mkdir /userdata/system/services
     touch /userdata/system/services/tailscale
     nano /userdata/system/services/tailscale
-***Creating tun and forwarding IP***
+***Creating tun, forwarding IP and saving batocera overlay to make the changes permanent***
 
   
     mkdir -p /dev/net

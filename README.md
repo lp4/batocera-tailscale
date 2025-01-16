@@ -94,6 +94,8 @@ example: cd tailscale_1.76.1_arm64
 
 ***Login to your tailscale with the given link and activate your batocera machine***
 
+***Go to "Admin console" of tailscale and approve the newly added machine***
+
 ***After login check tailscale IP in your machine***
 
     ip a
@@ -112,7 +114,7 @@ example: cd tailscale_1.76.1_arm64
 
 ***you must have tailscale ip in the list***
 
-**go to tailscale admin page, review your machine and enable "subnet routes" by selecting your CIDR**
+**go to tailscale admin page and enable "subnet routes" by selecting your CIDR**
 
-**now you can access your rom files, copy/paste/delete or ssh remotely if you have tailscale running in the remote computer/device using same tailscale account or by sharing your machine to your friends who has a tailscale account**
+**now you can access your rom files, copy/paste/delete or ssh remotely if you have tailscale running in the remote computer/device using same tailscale account or by sharing your machine to your friends who has a tailscale account with every reboot**
 

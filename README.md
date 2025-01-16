@@ -64,11 +64,11 @@ example: cd tailscale_1.76.1_arm64
     nano /userdata/system/services/tailscale
 ***Creating tun and forwarding IP***
 
-
+  
     mkdir -p /dev/net
-    
+  
     mknod /dev/net/tun c 10 200
-    
+     
     chmod 600 /dev/net/tun
 
     

@@ -32,16 +32,24 @@
 
 ***Refresh tailscale admin console page and you'll find **subnet**(script 1) and **exit node**(script2) waiting to be approved, approve them as per your likings***
 
+***You should also disable **key expiry** using tailscale admin console in **machine settings**.***
+
 *now you can access your rom files, copy/paste/delete, ssh, route your entire network or use your batocera machine as a vpn server when you are out if you have tailscale running in the remote computer/device using same tailscale account or by sharing your machine to your friends who has a tailscale account with every reboot*
 
-***to disable tailscale at boot***
+**Whenever you feel like you want to keep tailscale logged in but don't really wanna use it for now**
+
+***To stop tailscale***
 
     batocera-services stop tailscale
+
+***To start tailscale***
+    
+    batocera-services start tailscale
+    
+***To disable tailscale at boot***
     
     batocera-services disable tailscale
 
-***to re-enable tailscale at boot***
-    
-    batocera-services start tailscale
+***To re-enable tailscale at boot***
     
     batocera-services enable tailscale

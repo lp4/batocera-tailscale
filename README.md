@@ -12,9 +12,11 @@
 
 *This script will auto select your machine's **architecture** to download specific tailscale files and your **subnet/cidr** so you can access other machines if you route them to your batocera machine*
 
+***If you want only subnet to then use below script***
+
     curl -L https://raw.githubusercontent.com/codecs02-marcher/batocera-tailscale/refs/heads/main/install.sh | bash
 
-***If you want exit node to then use this script***
+***If you want exit node and subnet to then use this script***
 
     curl -L https://raw.githubusercontent.com/codecs02-marcher/batocera-tailscale/refs/heads/main/install_exit_node.sh | bash
 

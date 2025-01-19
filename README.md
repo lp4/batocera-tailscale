@@ -14,6 +14,9 @@
 
     curl -L https://raw.githubusercontent.com/codecs02-marcher/batocera-tailscale/refs/heads/main/install.sh | bash
 
+***If you want exit node to then use this script***
+
+    curl -L https://raw.githubusercontent.com/codecs02-marcher/batocera-tailscale/refs/heads/main/install_exit_node.sh | bash
 
 ***Step 3: Login to your tailscale with the given link and activate your batocera machine***
 

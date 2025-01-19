@@ -28,11 +28,11 @@
 
     ip a
 
-***you must have tailscale ip in the list***
+*you must have tailscale ip in the list*
 
 ***Refresh tailscale admin console page and you'll find **subnet**(script 1) and **exit node**(script2) waiting to be approved, approve them as per your likings***
 
-**now you can access your rom files, copy/paste/delete, ssh, route your entire network or use your batocera machine as vpn when you are out if you have tailscale running in the remote computer/device using same tailscale account or by sharing your machine to your friends who has a tailscale account with every reboot**
+*now you can access your rom files, copy/paste/delete, ssh, route your entire network or use your batocera machine as vpn when you are out if you have tailscale running in the remote computer/device using same tailscale account or by sharing your machine to your friends who has a tailscale account with every reboot*
 
 ***to disable tailscale at boot***
 

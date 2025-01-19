@@ -36,7 +36,7 @@
 
 ***to disable tailscale at boot***
 
-    batocera-services start tailscale
+    batocera-services stop tailscale
     
     batocera-services disable tailscale
 

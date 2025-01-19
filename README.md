@@ -1,8 +1,8 @@
 # Batocera-Tailscale
 
-**Access you batocera from anywhere in the world**
+**Access you batocera machine from anywhere in the world or use it as a vpn server**
 
-**Run Tailscale in batocera with Subnet and Accept Routes, tailscale starts at boot so you can access "share folder" or "ssh" remotely**
+**Run Tailscale in batocera with Subnet, Accept Routes or Exit node. Tailscale starts at boot**
 
 ***Step 1: Login into your batocera machine via ssh***
 
@@ -34,3 +34,14 @@
 
 **now you can access your rom files, copy/paste/delete, ssh, route your entire network or use your batocera machine as vpn when you are out if you have tailscale running in the remote computer/device using same tailscale account or by sharing your machine to your friends who has a tailscale account with every reboot**
 
+***to disable tailscale at boot***
+
+    batocera-services start tailscale
+    
+    batocera-services disable tailscale
+
+***to re-enable tailscale at boot***
+    
+    batocera-services start tailscale
+    
+    batocera-services enable tailscale

@@ -24,21 +24,13 @@
 
 ***Step 4: Go to "Admin console" of tailscale and approve the newly added machine***
 
-***Step 5: After Approval check tailscale IP in your machine***
-
-    ip a
-
-***Step 5:  Reboot your machine***
-
-    reboot
-
-***Step 6: After reboot check your machine's IP***
+***After Approval check tailscale IP in your machine***
 
     ip a
 
 ***you must have tailscale ip in the list***
 
-***Step 7: go to tailscale admin page and enable "subnet routes" by selecting your CIDR***
+***Refresh tailscale admin console page and you'll find **subnet**(script 1) and **exit node**(script2) waiting to be approved, approve them as per your likings***
 
-**now you can access your rom files, copy/paste/delete or ssh remotely if you have tailscale running in the remote computer/device using same tailscale account or by sharing your machine to your friends who has a tailscale account with every reboot**
+**now you can access your rom files, copy/paste/delete, ssh, route your entire network or use your batocera machine as vpn when you are out if you have tailscale running in the remote computer/device using same tailscale account or by sharing your machine to your friends who has a tailscale account with every reboot**
 

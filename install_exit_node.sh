@@ -111,7 +111,7 @@ CIDR=$(printf $NETWORK/$PREFIX)
 if [[ "$1" != "start" ]]; then
   exit 0
 fi
-/userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up --advertise-routes=$CIDR --snat-subnet-routes=false --accept-routes
+/userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up --advertise-routes=$CIDR --snat-subnet-routes=false --accept-routes --advertise-exit-node
 
 EOF
 echo "Creating tun, forwarding ip and saving batocera-overlay....."

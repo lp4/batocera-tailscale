@@ -53,6 +53,11 @@ case ${arch} in
     ;;
 esac
 
+batocera-services stop tailscale
+echo "Stopping existing tailscale"
+batocera-services disable tailscale
+echo "Disabling existing tailscale"
+
 # Creating temp files
 echo "Creating temp files..."
 rm -rf /userdata/temp

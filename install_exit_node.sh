@@ -20,6 +20,10 @@ fi
 if [[ "$(uname -m)" == "x86" ]]; then
         arch="386"
 fi
+if [[ "$(uname -m)" == "armv7l" ]]; then
+        arch="arm"
+fi
+
 # Finding Architecture.
 
 case ${arch} in

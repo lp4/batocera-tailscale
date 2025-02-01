@@ -24,6 +24,7 @@ if [[ "$(uname -m)" == "armv7l" ]]; then
         arch="arm"
 fi
 
+sleep 2
 
 # Finding Architecture.
 
@@ -53,14 +54,16 @@ case ${arch} in
     echo "supported tailscale zip $arch"
     ;;
 esac
-
+sleep 2
 batocera-services stop tailscale
 echo "Stopping existing tailscale"
+sleep 2 
 batocera-services disable tailscale
 echo "Disabling existing tailscale"
-
+sleep 2 
 # Creating temp files
 echo "Creating temp files..."
+sleep 2 
 rm -rf /userdata/temp
 mkdir -p /userdata/temp
 cd /userdata/temp || exit 1
@@ -68,9 +71,10 @@ cd /userdata/temp || exit 1
 # Dowload tailscale zip as per architecture
 echo "Downloading tailscale for your system........"
 wget -q https://pkgs.tailscale.com/stable/tailscale_1.80.0_$arch.tgz
-
+sleep 2
 # Exctrating Zip Files
 echo "Extracting Files and Creating Tailscale Folders..."
+sleep 2
 tar -xf tailscale_1.80.0_$arch.tgz
 cd tailscale_1.80.0_$arch || exit 1
 rm -rf /userdata/tailscale
@@ -82,6 +86,7 @@ cd /userdata || exit 1
 rm -rf /userdata/temp
 
 echo "Configuring Tailscale service..."
+sleep 2
 mkdir -p /userdata/system/services
 rm -rf /userdata/system/services/tailscale
 cat << 'EOF' > /userdata/system/services/tailscale
@@ -125,6 +130,7 @@ fi
 
 EOF
 echo "Creating tun, forwarding ip and saving batocera-overlay....."
+sleep 2
 rm -rf /dev/net
 mkdir -p /dev/net
 mknod /dev/net/tun c 10 200
@@ -137,11 +143,13 @@ EOL
 
 batocera-save-overlay
 echo "Saving Batocera Overlay"
+sleep 2
 sysctl -p /etc/sysctl.conf
 echo "IP Forwarded Successfully"
-
+sleep 2
 # Start Tailscale daemon
 echo "Starting Tailscale"
+sleep 5
 /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
 
 
@@ -158,6 +166,6 @@ fi
 
 batocera-services enable tailscale
 echo "Batocera services of tailscale enabled"
+sleep 2
 batocera-services start tailscale
 echo "Batocera Started Successfully"
-

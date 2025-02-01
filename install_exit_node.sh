@@ -134,7 +134,6 @@ sysctl -p /etc/sysctl.conf
 batocera-services enable tailscale
 batocera-services start tailscale
 
-
 # Check if the error is present in dmesg
 if dmesg | grep -q "UDP GRO forwarding is suboptimally configured"; then
     # Disable Generic Receive Offload (GRO) on eth0

@@ -138,8 +138,12 @@ sysctl -p /etc/sysctl.conf
 
 
 NETDEV=$(ip -o route get 8.8.8.8 | cut -f 5 -d " ")
-ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
-ethtool -K $NETDEV gro off
+if dmesg | grep -q "UDP GRO forwarding is suboptimally configured"; then
+    # Disable Generic Receive Offload (GRO) on eth0
+    ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
+    ethtool -K $NETDEV gro off
+    echo "Fixed UDP GRO forwarding issue on eth0"
+fi
 
 /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
 

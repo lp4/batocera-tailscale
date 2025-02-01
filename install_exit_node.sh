@@ -67,12 +67,12 @@ cd /userdata/temp || exit 1
 
 # Dowload tailscale zip as per architecture
 echo "Downloading tailscale for your system........"
-wget -q https://pkgs.tailscale.com/stable/tailscale_1.78.1_$arch.tgz
+wget -q https://pkgs.tailscale.com/stable/tailscale_1.80.1_$arch.tgz
 
 # Exctrating Zip Files
 echo "Extracting Files and Creating Tailscale Folders..."
-tar -xf tailscale_1.78.1_$arch.tgz
-cd tailscale_1.78.1_$arch || exit 1
+tar -xf tailscale_1.80.1_$arch.tgz
+cd tailscale_1.80.1_$arch || exit 1
 rm -rf /userdata/tailscale
 mkdir /userdata/tailscale
 mv systemd /userdata/tailscale/systemd

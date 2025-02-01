@@ -169,12 +169,8 @@ if dmesg | grep -q "UDP GRO forwarding is suboptimally configured"; then
     sleep 5
 fi
 
-if dmesg | grep -q "Some peers are advertising routes but --accept-routes is false"; then
-    # Disable Generic Receive Offload (GRO) on eth0
-    echo "Fixing above error.........."
-    sleep 3
-fi
-
+echo "Working on it........DONE"
+sleep 2
 batocera-services enable tailscale
 echo "Batocera services of tailscale enabled."
 sleep 5
@@ -190,10 +186,10 @@ echo "....."
 echo ".........."
 sleep 2
 echo "do you see tailscale interface and tailscale ip above?"
-sleep 15
+sleep 10
 echo "if 'Yes' then you have successfully configured tailscale in your batocera machine."
-sleep 10
+sleep 5
 echo "if 'No' then reboot your machine and run the script again."
-sleep 10
+sleep 5
 echo "Your Welcome....."
 sleep 5

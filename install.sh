@@ -1,8 +1,9 @@
 #!/bin/bash
 
 echo "......"
-sleep 2
+sleep 1
 echo "............."
+sleep 1
 arch=""
 echo "Running install script for subnet route..........."
 sleep 5

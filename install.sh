@@ -163,6 +163,7 @@ if dmesg | grep -q "UDP GRO forwarding is suboptimally configured"; then
     # Disable Generic Receive Offload (GRO) on eth0
     ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
     ethtool -K $NETDEV gro off
+    batocera-save-overlay
     echo "Fixed UDP GRO forwarding issue on $NETDEV....."
     sleep 5
     /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
@@ -192,9 +193,9 @@ echo "if 'Yes' then you have successfully configured tailscale in your batocera 
 sleep 5
 echo "if 'No' then reboot your machine and run the script again."
 sleep 5
-echo "Go back to tailscale admin console page and click on your newaly added batocera machine and you'll find 'subnets' option waiting to be approved"
+echo "Go back to tailscale admin console page and click on your newaly added batocera machine and you'll find 'subnets' option waiting to be approved."
 sleep 2
-echo "Approve it and you are done"
+echo "Approve it and you are done."
 sleep 2
 echo "Your Welcome....."
 sleep 5

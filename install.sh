@@ -187,7 +187,7 @@ ip a
 echo "....."
 echo ".........."
 sleep 2
-echo "do you see tailscale interface (example: 'tailscale0') below '$NETDEV' and 'tailscale ip' above?"
+echo "Above you will see tailscale interface (example: 'tailscale0') below '$NETDEV' and 'tailscale ip'"
 sleep 10
 echo "if 'Yes' then you have successfully configured tailscale in your batocera machine."
 sleep 5

@@ -1,7 +1,11 @@
 #!/bin/bash
 
+echo "......"
+sleep 2
+echo "............."
 arch=""
-echo "Running install script"
+echo "Running install script for subnet route..........."
+sleep 5
 if [[ "$(uname -m)" == "x86_64" ]]; then
         arch="386"
 fi

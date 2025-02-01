@@ -1,11 +1,11 @@
 #!/bin/bash
 
 echo "......"
-sleep 1
+sleep 2
 echo "............."
-sleep 1
+sleep 2
 arch=""
-echo "Running install script for subnet route..........."
+echo "Running Tailscale install script for subnet route..........."
 sleep 5
 if [[ "$(uname -m)" == "x86_64" ]]; then
         arch="386"
@@ -29,7 +29,7 @@ if [[ "$(uname -m)" == "armv7l" ]]; then
         arch="arm"
 fi
 
-sleep 2
+sleep 5
 
 # Finding Architecture.
 
@@ -59,16 +59,16 @@ case ${arch} in
     echo "supported tailscale zip $arch"
     ;;
 esac
-sleep 2
+sleep 5
 batocera-services stop tailscale
 echo "Stopping existing tailscale"
-sleep 2 
+sleep 5 
 batocera-services disable tailscale
 echo "Disabling existing tailscale"
-sleep 2 
+sleep 5 
 # Creating temp files
 echo "Creating temp files..."
-sleep 2 
+sleep 5 
 rm -rf /userdata/temp
 mkdir -p /userdata/temp
 cd /userdata/temp || exit 1
@@ -76,10 +76,10 @@ cd /userdata/temp || exit 1
 # Dowload tailscale zip as per architecture
 echo "Downloading tailscale for your system........"
 wget -q https://pkgs.tailscale.com/stable/tailscale_1.80.0_$arch.tgz
-sleep 2
+sleep 5
 # Exctrating Zip Files
 echo "Extracting Files and Creating Tailscale Folders..."
-sleep 2
+sleep 5
 tar -xf tailscale_1.80.0_$arch.tgz
 cd tailscale_1.80.0_$arch || exit 1
 rm -rf /userdata/tailscale
@@ -91,7 +91,7 @@ cd /userdata || exit 1
 rm -rf /userdata/temp
 
 echo "Configuring Tailscale service..."
-sleep 2
+sleep 5
 mkdir -p /userdata/system/services
 rm -rf /userdata/system/services/tailscale
 cat << 'EOF' > /userdata/system/services/tailscale
@@ -135,7 +135,7 @@ fi
 
 EOF
 echo "Creating tun, forwarding ip and saving batocera-overlay....."
-sleep 2
+sleep 5
 rm -rf /dev/net
 mkdir -p /dev/net
 mknod /dev/net/tun c 10 200
@@ -148,10 +148,10 @@ EOL
 
 batocera-save-overlay
 echo "Saving Batocera Overlay"
-sleep 2
+sleep 5
 sysctl -p /etc/sysctl.conf
 echo "IP Forwarded Successfully"
-sleep 2
+sleep 5
 # Start Tailscale daemon
 echo "Starting Tailscale"
 sleep 5
@@ -163,14 +163,21 @@ if dmesg | grep -q "UDP GRO forwarding is suboptimally configured"; then
     # Disable Generic Receive Offload (GRO) on eth0
     ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
     ethtool -K $NETDEV gro off
-    echo "Fixed UDP GRO forwarding issue on eth0"
+    echo "Fixed UDP GRO forwarding issue on $NETDEV"
+    sleep 5
     /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
     echo "Starting Tailscale Again"
+    sleep 5
 fi
 
-
+echo "Fixing above error.........."
+sleep 3
 batocera-services enable tailscale
 echo "Batocera services of tailscale enabled"
-sleep 2
+sleep 5
 batocera-services start tailscale
 echo "Batocera Started Successfully"
+sleep 5
+echo "Check Tailscale interface and connected ip using command 'ip a'."
+sleep 5
+

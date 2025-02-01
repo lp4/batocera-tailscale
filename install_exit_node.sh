@@ -183,6 +183,7 @@ echo "Running 'ip a' command for you...."
 sleep 5
 ip a
 sleep 5
+
 echo "do you see tailscale interface and tailscale ip above?"
 sleep 15
 echo "if 'Yes' then you have successfully configured tailscale in your batocera machine"

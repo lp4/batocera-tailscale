@@ -179,4 +179,15 @@ echo "Batocera Started Successfully"
 sleep 5
 echo "Check Tailscale interface and connected ip using command 'ip a'."
 sleep 5
-
+echo "Running 'ip a' command for you...."
+sleep 5
+ip a
+sleep 5
+echo "do you see tailscale interface and tailscale ip above?"
+sleep 15
+echo "if 'Yes' then you have successfully configured tailscale in your batocera machine"
+sleep 10
+echo "if 'No' then reboot your machine and run the script again"
+sleep 10
+echo "Thank You"
+sleep 10

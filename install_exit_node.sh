@@ -130,18 +130,28 @@ net.ipv6.conf.all.forwarding = 1
 EOL
 
 batocera-save-overlay
+echo "Batocera Overlay Saved......"
 sysctl -p /etc/sysctl.conf
+echo "IP Forwarded......."
 
 # Start Tailscale daemon
+echo "Starting Tailscale......"
 /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
+
 
 NETDEV=$(ip -o route get 8.8.8.8 | cut -f 5 -d " ")
-ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
-ethtool -K $NETDEV gro off
+if dmesg | grep -q "UDP GRO forwarding is suboptimally configured"; then
+    # Disable Generic Receive Offload (GRO) on eth0
+    ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
+    ethtool -K $NETDEV gro off
+    echo "Fixed UDP GRO forwarding issue on $NETDEV"
+    /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
+    echo "Starting Tailscale Again"
+fi
 
-
-/userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
 
 batocera-services enable tailscale
+echo "Batocera services of tailscale enabled"
 batocera-services start tailscale
+echo "Batocera Started Successfully"
 

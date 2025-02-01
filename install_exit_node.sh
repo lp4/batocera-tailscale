@@ -191,5 +191,9 @@ echo "if 'Yes' then you have successfully configured tailscale in your batocera 
 sleep 5
 echo "if 'No' then reboot your machine and run the script again."
 sleep 5
+echo "Go back to tailscale admin console page and you'll find subnet and exit node waiting to be approved"
+sleep 2
+echo "Approve them and you are done"
+sleep 2
 echo "Your Welcome....."
 sleep 5

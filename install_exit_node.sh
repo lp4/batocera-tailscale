@@ -6,7 +6,7 @@ echo "............."
 sleep 1
 arch=""
 echo "Running install script for subnet route and exit node..........."
-sleep 5
+sleep 8
 if [[ "$(uname -m)" == "x86_64" ]]; then
         arch="386"
 fi
@@ -58,13 +58,13 @@ case ${arch} in
     echo "supported tailscale zip $arch"
     ;;
 esac
-sleep 2
+sleep 5
 batocera-services stop tailscale
 echo "Stopping existing tailscale"
-sleep 2
+sleep 5
 batocera-services disable tailscale
 echo "Disabling existing tailscale"
-sleep 2
+sleep 5
 
 
 # Creating temp files
@@ -72,11 +72,11 @@ echo "Creating temp files..."
 rm -rf /userdata/temp
 mkdir -p /userdata/temp
 cd /userdata/temp || exit 1
-sleep 2
+sleep 5
 # Dowload tailscale zip as per architecture
 echo "Downloading tailscale for your system........"
 wget -q https://pkgs.tailscale.com/stable/tailscale_1.80.0_$arch.tgz
-sleep 5
+sleep 8
 # Exctrating Zip Files
 echo "Extracting Files and Creating Tailscale Folders..."
 tar -xf tailscale_1.80.0_$arch.tgz
@@ -88,10 +88,10 @@ mv tailscale /userdata/tailscale/tailscale
 mv tailscaled /userdata/tailscale/tailscaled
 cd /userdata || exit 1
 rm -rf /userdata/temp
-sleep 2
+sleep 5
 echo "Configuring Tailscale service..."
 mkdir -p /userdata/system/services
-sleep 2
+sleep 5
 rm -rf /userdata/system/services/tailscale
 cat << 'EOF' > /userdata/system/services/tailscale
 #!/bin/bash
@@ -143,13 +143,13 @@ cat <<EOL > "/etc/sysctl.conf"
 net.ipv4.ip_forward = 1
 net.ipv6.conf.all.forwarding = 1
 EOL
-sleep 2
+sleep 4
 batocera-save-overlay
 echo "Batocera Overlay Saved......"
-sleep 2
+sleep 4
 sysctl -p /etc/sysctl.conf
 echo "IP Forwarded......."
-sleep 2
+sleep 4
 
 # Start Tailscale daemon
 echo "Starting Tailscale......"
@@ -166,14 +166,17 @@ if dmesg | grep -q "UDP GRO forwarding is suboptimally configured"; then
     sleep 2
     /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
     echo "Starting Tailscale Again"
-    sleep 2
+    sleep 5
 fi
 
-
+echo "Fixing above error......"
+sleep 5
 batocera-services enable tailscale
 echo "Batocera services of tailscale enabled"
-sleep 2
+sleep 5
 batocera-services start tailscale
 echo "Batocera Started Successfully"
-sleep 2
+sleep 5
+echo "Check Tailscale interface and connected ip using command 'ip a'."
+sleep 5
 

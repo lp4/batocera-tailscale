@@ -5,8 +5,8 @@ sleep 1
 echo "............."
 sleep 1
 arch=""
-echo "Running install script for subnet route and exit node..........."
-sleep 8
+echo "Running Tailscale install script for subnet route and exit node..........."
+sleep 5
 if [[ "$(uname -m)" == "x86_64" ]]; then
         arch="386"
 fi
@@ -169,8 +169,8 @@ if dmesg | grep -q "UDP GRO forwarding is suboptimally configured"; then
     sleep 5
 fi
 
-echo "Fixing above error......"
-sleep 5
+echo "Fixing above error.........."
+sleep 3
 batocera-services enable tailscale
 echo "Batocera services of tailscale enabled"
 sleep 5

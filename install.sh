@@ -61,13 +61,13 @@ case ${arch} in
 esac
 sleep 5
 batocera-services stop tailscale
-echo "Stopping existing tailscale"
+echo "Stopping existing tailscale......."
 sleep 5 
 batocera-services disable tailscale
-echo "Disabling existing tailscale"
+echo "Disabling existing tailscale......."
 sleep 5 
 # Creating temp files
-echo "Creating temp files..."
+echo "Creating temp files........"
 sleep 5 
 rm -rf /userdata/temp
 mkdir -p /userdata/temp
@@ -78,7 +78,7 @@ echo "Downloading tailscale for your system........"
 wget -q https://pkgs.tailscale.com/stable/tailscale_1.80.0_$arch.tgz
 sleep 5
 # Exctrating Zip Files
-echo "Extracting Files and Creating Tailscale Folders..."
+echo "Extracting Files and Creating Tailscale Folders........"
 sleep 5
 tar -xf tailscale_1.80.0_$arch.tgz
 cd tailscale_1.80.0_$arch || exit 1
@@ -90,7 +90,7 @@ mv tailscaled /userdata/tailscale/tailscaled
 cd /userdata || exit 1
 rm -rf /userdata/temp
 
-echo "Configuring Tailscale service..."
+echo "Configuring Tailscale service......."
 sleep 5
 mkdir -p /userdata/system/services
 rm -rf /userdata/system/services/tailscale
@@ -163,33 +163,34 @@ if dmesg | grep -q "UDP GRO forwarding is suboptimally configured"; then
     # Disable Generic Receive Offload (GRO) on eth0
     ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
     ethtool -K $NETDEV gro off
-    echo "Fixed UDP GRO forwarding issue on $NETDEV"
+    echo "Fixed UDP GRO forwarding issue on $NETDEV....."
     sleep 5
     /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
-    echo "Starting Tailscale Again"
+    echo "Starting Tailscale Again......"
     sleep 5
 fi
 
 echo "Fixing above error.........."
 sleep 3
 batocera-services enable tailscale
-echo "Batocera services of tailscale enabled"
+echo "Batocera services of tailscale enabled."
 sleep 5
 batocera-services start tailscale
-echo "Batocera Started Successfully"
+echo "Batocera Started Successfully."
 sleep 5
 echo "Check Tailscale interface and connected ip using command 'ip a'."
 sleep 5
-echo "Running 'ip a' command for you...."
+echo "Running 'ip a' command for you......."
 sleep 5
 ip a
-sleep 5
+echo "....."
+echo ".........."
+sleep 2
 echo "do you see tailscale interface and tailscale ip above?"
 sleep 15
-echo "if 'Yes' then you have successfully configured tailscale in your batocera machine"
+echo "if 'Yes' then you have successfully configured tailscale in your batocera machine."
 sleep 10
-echo "if 'No' then reboot your machine and run the script again"
+echo "if 'No' then reboot your machine and run the script again."
 sleep 10
-echo "Thank You"
-sleep 10
-
+echo "Your Welcome....."
+sleep 5

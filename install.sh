@@ -180,4 +180,8 @@ echo "Batocera Started Successfully"
 sleep 5
 echo "Check Tailscale interface and connected ip using command 'ip a'."
 sleep 5
+echo "Running 'ip a' command for you...."
+sleep 5
+ip a
+sleep 5
 

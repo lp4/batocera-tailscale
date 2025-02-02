@@ -151,6 +151,11 @@ sysctl -p /etc/sysctl.conf
 echo "nameserver 8.8.8.8" | tee /etc/resolv.conf
 echo "IP Forwarded......."
 sleep 4
+NETDEV=$(ip -o route get 8.8.8.8 | cut -f 5 -d " ")
+ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
+ethtool -K $NETDEV gro off
+iptables -t nat -A POSTROUTING -o $NETDEV -j MASQUERADE
+ip6tables -t nat -A POSTROUTING -o $NETDEV -j MASQUERADE
 batocera-save-overlay
 echo "Batocera Overlay Saved......"
 sleep 4
@@ -159,20 +164,6 @@ sleep 4
 echo "Starting Tailscale......"
 sleep 5
 /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
-
-
-NETDEV=$(ip -o route get 8.8.8.8 | cut -f 5 -d " ")
-if dmesg | grep -q "UDP GRO forwarding is suboptimally configured"; then
-    # Disable Generic Receive Offload (GRO) on eth0
-    ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
-    ethtool -K $NETDEV gro off
-    batocera-save-overlay
-    echo "Fixed UDP GRO forwarding issue on $NETDEV"
-    sleep 2
-    /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
-    echo "Starting Tailscale Again......"
-    sleep 5
-fi
 
 echo "Working on it........DONE"
 sleep 2

@@ -128,13 +128,12 @@ NETWORK=$(printf "%d.%d.%d.%d" $(( o1 & m1 )) \
 CIDR=$(printf $NETWORK/$PREFIX)
 ethtool -K $INTERFACE rx-udp-gro-forwarding on rx-gro-list off
 ethtool -K $INTERFACE gro off
+iptables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
+ip6tables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
 if [[ "$1" != "start" ]]; then
   exit 0
 fi
 /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up --advertise-routes=$CIDR --snat-subnet-routes=false --accept-routes --advertise-exit-node --accept-dns=true
-
-iptables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
-ip6tables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
 
 EOF
 echo "Creating tun, forwarding ip and saving batocera-overlay....."
@@ -152,11 +151,6 @@ sysctl -p /etc/sysctl.conf
 echo "nameserver 8.8.8.8" | tee /etc/resolv.conf
 echo "IP Forwarded......."
 sleep 4
-NETDEV=$(ip -o route get 8.8.8.8 | cut -f 5 -d " ")
-ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
-ethtool -K $NETDEV gro off
-iptables -t nat -A POSTROUTING -o $NETDEV -j MASQUERADE
-ip6tables -t nat -A POSTROUTING -o $NETDEV -j MASQUERADE
 batocera-save-overlay
 echo "Batocera Overlay Saved......"
 sleep 4
@@ -204,9 +198,13 @@ NETWORK=$(printf "%d.%d.%d.%d" $(( o1 & m1 )) \
                               $(( o4 & m4 )))
 
 CIDR=$(printf $NETWORK/$PREFIX)
+ethtool -K $INTERFACE rx-udp-gro-forwarding on rx-gro-list off
+ethtool -K $INTERFACE gro off
 /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up --advertise-routes=$CIDR --snat-subnet-routes=false --accept-routes --advertise-exit-node --accept-dns=true
 echo "Batocera Started Successfully."
 sleep 5
+iptables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
+ip6tables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
 echo "Check Tailscale interface and connected ip using command 'ip a'."
 sleep 5
 echo "Running 'ip a' command for you...."

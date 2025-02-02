@@ -144,11 +144,11 @@ net.ipv4.ip_forward = 1
 net.ipv6.conf.all.forwarding = 1
 EOL
 sleep 4
-batocera-save-overlay
-echo "Batocera Overlay Saved......"
-sleep 4
 sysctl -p /etc/sysctl.conf
 echo "IP Forwarded......."
+sleep 4
+batocera-save-overlay
+echo "Batocera Overlay Saved......"
 sleep 4
 
 # Start Tailscale daemon

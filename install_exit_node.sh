@@ -126,6 +126,17 @@ NETWORK=$(printf "%d.%d.%d.%d" $(( o1 & m1 )) \
                               $(( o4 & m4 )))
 
 CIDR=$(printf $NETWORK/$PREFIX)
+rm -rf /dev/net
+mkdir -p /dev/net
+mknod /dev/net/tun c 10 200
+chmod 600 /dev/net/tun
+cp /etc/sysctl.conf /etc/sysctl.conf.bak
+rm -rf /etc/sysctl.conf
+touch /etc/sysctl.conf
+cat <<EOL > "/etc/sysctl.conf"
+net.ipv4.ip_forward = 1
+net.ipv6.conf.all.forwarding = 1
+EOL
 ethtool -K $INTERFACE rx-udp-gro-forwarding on rx-gro-list off
 ethtool -K $INTERFACE gro off
 iptables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
@@ -142,6 +153,8 @@ mkdir -p /dev/net
 mknod /dev/net/tun c 10 200
 chmod 600 /dev/net/tun
 cp /etc/sysctl.conf /etc/sysctl.conf.bak
+rm -rf /etc/sysctl.conf
+touch /etc/sysctl.conf
 cat <<EOL > "/etc/sysctl.conf"
 net.ipv4.ip_forward = 1
 net.ipv6.conf.all.forwarding = 1

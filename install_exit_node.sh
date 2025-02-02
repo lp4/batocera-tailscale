@@ -173,12 +173,38 @@ sleep 2
 batocera-services enable tailscale
 echo "Batocera services of tailscale enabled."
 sleep 5
-echo "Go back to tailscale admin console page and click on your newaly added batocera machine and you'll find 'subnets' and 'exit node' options waiting to be approved."
-sleep 5
-echo "Approve them"
-sleep 3
-batocera-services start tailscale
-batocera-save-overlay
+INTERFACE=$(ip -o -4 route show to default | awk '{print $5}')
+
+if ! ip link show "$INTERFACE" > /dev/null 2>&1; then
+    echo "Error: Interface $INTERFACE does not exist." >&2
+    exit 1
+fi
+
+CIDDR=$(ip -o -f inet addr show "$INTERFACE" | awk '{print $4}')
+
+if [ -z "$CIDDR" ]; then
+    echo "Error: No IP address found for interface $INTERFACE." >&2
+    exit 1
+fi
+
+IP=$(echo "$CIDDR" | cut -d'/' -f1)
+PREFIX=$(echo "$CIDDR" | cut -d'/' -f2)
+
+MASK=$(( 0xFFFFFFFF << (32 - PREFIX) & 0xFFFFFFFF ))
+MASK_OCTETS=$(printf "%d.%d.%d.%d" $(( (MASK >> 24) & 0xFF )) \
+                                  $(( (MASK >> 16) & 0xFF )) \
+                                  $(( (MASK >> 8) & 0xFF )) \
+                                  $(( MASK & 0xFF )))
+
+IFS=. read -r o1 o2 o3 o4 <<< "$IP"
+IFS=. read -r m1 m2 m3 m4 <<< "$MASK_OCTETS"
+NETWORK=$(printf "%d.%d.%d.%d" $(( o1 & m1 )) \
+                              $(( o2 & m2 )) \
+                              $(( o3 & m3 )) \
+                              $(( o4 & m4 )))
+
+CIDR=$(printf $NETWORK/$PREFIX)
+/userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up --advertise-routes=$CIDR --snat-subnet-routes=false --accept-routes --advertise-exit-node --accept-dns=true
 echo "Batocera Started Successfully."
 sleep 5
 echo "Check Tailscale interface and connected ip using command 'ip a'."
@@ -196,8 +222,8 @@ sleep 5
 echo "if 'No' then reboot your machine and run the script again."
 sleep 5
 echo "Go back to tailscale admin console page and click on your newaly added batocera machine and you'll find 'subnets' and 'exit node' options waiting to be approved."
-sleep 2
-echo "Disable Key Expiry' and you are done."
+sleep 5
+echo "Approve them, Disable Key Expiry' and you are done."
 sleep 3
 echo "Your Welcome....."
 sleep 3

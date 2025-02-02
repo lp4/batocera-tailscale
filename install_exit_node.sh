@@ -210,8 +210,13 @@ NETWORK=$(printf "%d.%d.%d.%d" $(( o1 & m1 )) \
                               $(( o4 & m4 )))
 
 CIDR=$(printf $NETWORK/$PREFIX)
+echo "Your Interface is $INTERFACE"
+sleep 3
+echo "Your CIDR is $CIDR"
+sleep 3
 ethtool -K $INTERFACE rx-udp-gro-forwarding on rx-gro-list off
 ethtool -K $INTERFACE gro off
+echo "starting tailscale with 'CIDR: $CIDR' and 'Exit Node'"
 /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up --advertise-routes=$CIDR --snat-subnet-routes=false --accept-routes --advertise-exit-node --accept-dns=true
 echo "Batocera Started Successfully."
 sleep 5

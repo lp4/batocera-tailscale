@@ -1,23 +1,25 @@
 #!/bin/bash
 
-batocera-services start tailscale    #This will take care of the tailscale not starting at boot
-
 case "$1" in
     start)
+        # This will Start Tailscale on boot
+        batocera-services start tailscale
+
+        # Restart logic: Loop to check time
         (
             while true; do
-                current_day=$(date +%u)  
-                current_time=$(date +%H:%M)  
+                current_day=$(date +%u)  # Get current day (1=Monday, 2=Tuesday, ..., 7=Sunday)
+                current_time=$(date +%H:%M)  # Get current time HH:MM
 
-                if [[ "$current_day" -eq 2 && "$current_time" == "05:30" ]]; then  # This will reboot batocera every tuesday at 5:30 
-                    batocera-es-swissknife --reboot
+                if [[ "$current_day" -eq 2 && "$current_time" == "05:30" ]]; then
+                    echo "Scheduled restart at $current_time on Tuesday"
+                    /sbin/reboot
                 fi
 
-                sleep 60  #Check every minute/60s
+                sleep 60  # Check every minute
             done
         ) &
         ;;
     stop)
-        # No specific stop logic needed
         ;;
 esac

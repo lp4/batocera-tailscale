@@ -148,7 +148,6 @@ net.ipv6.conf.all.forwarding = 1
 EOL
 sleep 4
 sysctl -p /etc/sysctl.conf
-echo "nameserver 8.8.8.8" | tee /etc/resolv.conf
 echo "IP Forwarded......."
 sleep 4
 batocera-save-overlay

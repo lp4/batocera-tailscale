@@ -164,6 +164,8 @@ sleep 4
 # Start Tailscale daemon
 echo "Starting Tailscale......"
 sleep 5
+echo "Login to tailscale using given link and approve the machine"
+sleep 5
 /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
 
 echo "Working on it........DONE"
@@ -171,6 +173,10 @@ sleep 2
 batocera-services enable tailscale
 echo "Batocera services of tailscale enabled."
 sleep 5
+echo "Go back to tailscale admin console page and click on your newaly added batocera machine and you'll find 'subnets' and 'exit node' options waiting to be approved."
+sleep 5
+echo "Approve them"
+sleep 3
 batocera-services start tailscale
 batocera-save-overlay
 echo "Batocera Started Successfully."
@@ -191,7 +197,7 @@ echo "if 'No' then reboot your machine and run the script again."
 sleep 5
 echo "Go back to tailscale admin console page and click on your newaly added batocera machine and you'll find 'subnets' and 'exit node' options waiting to be approved."
 sleep 2
-echo "Approve them, 'Disable Key Expiry' and you are done."
+echo "Disable Key Expiry' and you are done."
 sleep 3
 echo "Your Welcome....."
 sleep 3

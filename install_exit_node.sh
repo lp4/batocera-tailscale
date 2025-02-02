@@ -126,14 +126,15 @@ NETWORK=$(printf "%d.%d.%d.%d" $(( o1 & m1 )) \
                               $(( o4 & m4 )))
 
 CIDR=$(printf $NETWORK/$PREFIX)
-iptables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
-ip6tables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
 ethtool -K $INTERFACE rx-udp-gro-forwarding on rx-gro-list off
 ethtool -K $INTERFACE gro off
 if [[ "$1" != "start" ]]; then
   exit 0
 fi
 /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up --advertise-routes=$CIDR --snat-subnet-routes=false --accept-routes --advertise-exit-node --accept-dns=true
+
+iptables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
+ip6tables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
 
 EOF
 echo "Creating tun, forwarding ip and saving batocera-overlay....."

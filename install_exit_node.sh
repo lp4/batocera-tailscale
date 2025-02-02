@@ -126,6 +126,7 @@ NETWORK=$(printf "%d.%d.%d.%d" $(( o1 & m1 )) \
                               $(( o4 & m4 )))
 
 CIDR=$(printf $NETWORK/$PREFIX)
+iptables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
 
 if [[ "$1" != "start" ]]; then
   exit 0

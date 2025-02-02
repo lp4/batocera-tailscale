@@ -176,6 +176,7 @@ batocera-services enable tailscale
 echo "Batocera services of tailscale enabled."
 sleep 5
 batocera-services start tailscale
+batocera-save-overlay
 echo "Batocera Started Successfully."
 sleep 5
 echo "Check Tailscale interface and connected ip using command 'ip a'."

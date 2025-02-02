@@ -128,6 +128,8 @@ NETWORK=$(printf "%d.%d.%d.%d" $(( o1 & m1 )) \
 CIDR=$(printf $NETWORK/$PREFIX)
 iptables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
 ip6tables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
+ethtool -K $INTERFACE rx-udp-gro-forwarding on rx-gro-list off
+ethtool -K $INTERFACE gro off
 if [[ "$1" != "start" ]]; then
   exit 0
 fi

@@ -195,9 +195,7 @@ echo "if 'No' then reboot your machine and run the script again."
 sleep 5
 echo "Go back to tailscale admin console page and click on your newaly added batocera machine and you'll find 'subnets' and 'exit node' options waiting to be approved."
 sleep 2
-echo "Approve them and you are done."
-sleep 2
-echo "Also 'Disable Key Expiry' so you don't have to re-login ever again."
+echo "Approve them, 'Disable Key Expiry' and you are done."
 sleep 3
 echo "Your Welcome....."
 sleep 3

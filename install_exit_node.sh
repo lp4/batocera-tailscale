@@ -197,5 +197,7 @@ echo "Go back to tailscale admin console page and click on your newaly added bat
 sleep 2
 echo "Approve them and you are done."
 sleep 2
+echo "Also 'Disable Key Expiry' so you don't have to re-login ever again."
+sleep 3
 echo "Your Welcome....."
-sleep 5
+sleep 3

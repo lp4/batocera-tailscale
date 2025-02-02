@@ -137,6 +137,7 @@ cat <<EOL > "/etc/sysctl.conf"
 net.ipv4.ip_forward = 1
 net.ipv6.conf.all.forwarding = 1
 EOL
+sysctl -p /etc/sysctl.conf
 ethtool -K $INTERFACE rx-udp-gro-forwarding on rx-gro-list off
 ethtool -K $INTERFACE gro off
 iptables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE

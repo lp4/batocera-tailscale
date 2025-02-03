@@ -95,6 +95,7 @@ sleep 5
 rm -rf /userdata/system/services/tailscale
 cat << 'EOF' > /userdata/system/services/tailscale
 #!/bin/bash
+sleep 60
 INTERFACE=$(ip -o -4 route show to default | awk '{print $5}')
 
 if ! ip link show "$INTERFACE" > /dev/null 2>&1; then

@@ -2,18 +2,15 @@
 
 case "$1" in
     start)
-        # This will Start Tailscale on boot
-        batocera-services start tailscale
 
         # Restart logic: Loop to check time
         (
             while true; do
-                current_day=$(date +%u)  # Get current day (1=Monday, 2=Tuesday, ..., 7=Sunday)
                 current_time=$(date +%H:%M)  # Get current time HH:MM
 
-                if [[ "$current_day" -eq 2 && "$current_time" == "05:30" ]]; then
-                    echo "Scheduled restart at $current_time on Tuesday"
-                    /sbin/reboot
+                if [[ "$current_time" == "20:00" ]]; then
+                    echo "Scheduled shutdown at $current_time"
+                    shutdown -h now
                 fi
 
                 sleep 60  # Check every minute

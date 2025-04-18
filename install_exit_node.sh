@@ -239,7 +239,7 @@ echo "if 'Yes' then you have successfully configured tailscale in your batocera 
 sleep 5
 echo "if 'No' then reboot your machine and run the script again."
 sleep 5
-echo "Go back to tailscale admin console page and click on your newaly added batocera machine and you'll find 'subnets' and 'exit node' options waiting to be approved."
+echo "Go back to tailscale admin console page and click on your newly added batocera machine and you'll find 'subnets' and 'exit node' options waiting to be approved."
 sleep 5
 echo "Approve them, Disable Key Expiry' and you are done."
 sleep 3

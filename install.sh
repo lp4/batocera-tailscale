@@ -47,6 +47,8 @@ if [[ "$(uname -m)" == "armv7l" ]]; then
         arch="arm"
 fi
 
+sleep 5
+
 # Finding Architecture.
 case ${arch} in
   386)
@@ -81,6 +83,7 @@ case ${arch} in
     ;;
 esac
 
+
 # --- 2. Stop and Disable Existing Tailscale Service ---
 echo "Stopping and disabling any existing Tailscale service..."
 batocera-services stop tailscale || true
@@ -92,7 +95,9 @@ rm -rf /userdata/temp
 mkdir -p /userdata/temp
 cd /userdata/temp
 
-echo "Downloading Tailscale v1.88.3 for your system..."
+echo "Downloading Tailscale for your system..."
+# NOTE: The original script used 1.80.0. I am using a newer version for security/features.
+# If you need the exact older version, change 1.88.3 to 1.80.0 in the next two lines.
 wget -q "https://pkgs.tailscale.com/stable/tailscale_1.88.3_${arch}.tgz"
 
 echo "Extracting and installing files..."
@@ -120,6 +125,7 @@ if ! ip link show "$INTERFACE" > /dev/null 2>&1; then
     echo "Error: Default interface $INTERFACE does not exist." >&2
     exit 1
 fi
+# Correctly determine the SUBNET CIDR, not the host CIDR
 SUBNET_CIDR=$(ip -o -4 route show dev "$INTERFACE" | awk '/src/ {print $1}' | head -n 1)
 if [ -z "$SUBNET_CIDR" ]; then
     echo "Error: Could not determine subnet for interface $INTERFACE." >&2
@@ -130,34 +136,4 @@ sleep 2
 /userdata/tailscale/tailscale up --advertise-routes=$SUBNET_CIDR --snat-subnet-routes=false --accept-routes
 EOF
 
-# --- 5. Configure System for IP Forwarding ---
-echo "Enabling IP forwarding and ensuring TUN device exists..."
-mkdir -p /dev/net
-if [ ! -c /dev/net/tun ]; then
-    mknod /dev/net/tun c 10 200
-fi
-chmod 600 /dev/net/tun
-
-cat <<EOL > "/etc/sysctl.conf"
-net.ipv4.ip_forward = 1
-net.ipv6.conf.all.forwarding = 1
-EOL
-sysctl -p /etc/sysctl.conf
-
-# --- 6. Initial Authentication and Subnet Setup ---
-echo "Starting Tailscale daemon for initial authentication..."
-/userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &
-sleep 2
-INTERFACE=$(ip -o -4 route show to default | awk '{print $5}')
-SUBNET_CIDR=$(ip -o -4 route show dev "$INTERFACE" | awk '/src/ {print $1}' | head -n 1)
-if [ -z "$SUBNET_CIDR" ]; then
-    echo "Error: Could not automatically determine subnet route for $INTERFACE." >&2
-    exit 1
-fi
-
-echo "Authenticating with Tailscale and advertising subnet route: $SUBNET_CIDR"
-/userdata/tailscale/tailscale up --authkey="${TAILSCALE_AUTH_KEY}" --advertise-routes=$SUBNET_CIDR --snat-subnet-routes=false --accept-routes
-
-# --- 7. Apply Network Optimizations (if needed) ---
-NETDEV=$(ip -o route get 8.8.8.8 | cut -f 5 -d " ")
-if dmesg | grep -q "UDP GRO
+# ---

@@ -22,20 +22,64 @@ fi
 
 echo "Running Tailscale install script..."
 
-# --- 1. Determine System Architecture ---
+# --- 1. Determine System Architecture (User's Original Method) ---
 echo "Detecting system architecture..."
-case "$(uname -m)" in
-    x86_64)   arch="amd64" ;;
-    aarch64)  arch="arm64" ;;
-    armv7l)   arch="arm" ;;
-    riscv64)  arch="riscv64" ;;
-    i386|i686|x86) arch="386" ;;
-    *)
-      echo "Error: Unsupported architecture '$(uname -m)'." >&2
+arch=""
+if [[ "$(uname -m)" == "x86_64" ]]; then
+        arch="386"
+fi
+if [[ "$(uname -m)" == "aarch64" ]]; then
+        arch="arm64"
+fi
+if [[ "$(uname -m)" == "aarch32" ]]; then
+        arch="arm"
+fi
+if [[ "$(uname -m)" == "amd64" ]]; then
+        arch="amd64"
+fi
+if [[ "$(uname -m)" == "riscv64" ]]; then
+        arch="riscv64"
+fi
+if [[ "$(uname -m)" == "x86" ]]; then
+        arch="386"
+fi
+if [[ "$(uname -m)" == "armv7l" ]]; then
+        arch="arm"
+fi
+
+# Finding Architecture.
+case ${arch} in
+  386)
+    arch="386"
+    echo "supported tailscale zip $arch"
+    ;;
+  arm64)
+    arch="arm64"
+    echo "supported tailscale zip $arch"
+    ;;
+  arm)
+    arch="arm"
+    echo "supported tailscale zip $arch"
+    ;;
+  amd64)
+    arch="amd64"
+    echo "supported tailscale zip $arch"
+    ;;
+  riscv64)
+    arch="riscv64"
+    echo "supported tailscale zip $arch"
+    ;;
+  386)
+    arch="386"
+    echo "supported tailscale zip $arch"
+    ;;
+  *)
+    if [ -z "$arch" ]; then
+      echo "Error: Architecture could not be determined." >&2
       exit 1
-      ;;
+    fi
+    ;;
 esac
-echo "Architecture found: $arch"
 
 # --- 2. Stop and Disable Existing Tailscale Service ---
 echo "Stopping and disabling any existing Tailscale service..."
@@ -66,7 +110,6 @@ rm -rf /userdata/temp
 # --- 4. Configure Tailscale Service for Batocera ---
 echo "Configuring Tailscale service file..."
 mkdir -p /userdata/system/services
-# The service file now also correctly calculates the network CIDR
 cat << 'EOF' > /userdata/system/services/tailscale
 #!/bin/bash
 if [[ "$1" != "start" ]]; then
@@ -77,15 +120,11 @@ if ! ip link show "$INTERFACE" > /dev/null 2>&1; then
     echo "Error: Default interface $INTERFACE does not exist." >&2
     exit 1
 fi
-
-# Correctly determine the SUBNET CIDR, not the host CIDR
 SUBNET_CIDR=$(ip -o -4 route show dev "$INTERFACE" | awk '/src/ {print $1}' | head -n 1)
-
 if [ -z "$SUBNET_CIDR" ]; then
     echo "Error: Could not determine subnet for interface $INTERFACE." >&2
     exit 1
 fi
-
 /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &
 sleep 2
 /userdata/tailscale/tailscale up --advertise-routes=$SUBNET_CIDR --snat-subnet-routes=false --accept-routes
@@ -109,12 +148,8 @@ sysctl -p /etc/sysctl.conf
 echo "Starting Tailscale daemon for initial authentication..."
 /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &
 sleep 2
-
-# ** THE FIX IS HERE **
-# Correctly calculate the subnet route instead of using the host IP
 INTERFACE=$(ip -o -4 route show to default | awk '{print $5}')
 SUBNET_CIDR=$(ip -o -4 route show dev "$INTERFACE" | awk '/src/ {print $1}' | head -n 1)
-
 if [ -z "$SUBNET_CIDR" ]; then
     echo "Error: Could not automatically determine subnet route for $INTERFACE." >&2
     exit 1
@@ -125,28 +160,4 @@ echo "Authenticating with Tailscale and advertising subnet route: $SUBNET_CIDR"
 
 # --- 7. Apply Network Optimizations (if needed) ---
 NETDEV=$(ip -o route get 8.8.8.8 | cut -f 5 -d " ")
-if dmesg | grep -q "UDP GRO forwarding is suboptimally configured"; then
-    echo "Applying UDP GRO forwarding fix on $NETDEV..."
-    ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
-    ethtool -K $NETDEV gro off
-fi
-
-# --- 8. Finalize and Start Service ---
-echo "Saving system configuration overlay..."
-batocera-save-overlay
-echo "Enabling and starting Tailscale service..."
-batocera-services enable tailscale
-batocera-services start tailscale
-batocera-save-overlay
-
-echo "--------------------------------------------------"
-echo "✅ Tailscale installation and configuration complete!"
-echo "--------------------------------------------------"
-echo "Showing current network interfaces..."
-sleep 2
-ip a
-echo
-echo "IMPORTANT: Go to your Tailscale Admin Console."
-echo "1. Find this new machine and approve its subnet route ($SUBNET_CIDR)."
-echo "2. It is also recommended to 'Disable key expiry' for this machine."
-echo
+if dmesg | grep -q "UDP GRO

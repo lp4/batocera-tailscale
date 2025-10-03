@@ -14,7 +14,7 @@
 
 ***If you want only subnet to then use below script.***
 
-    curl -L https://raw.githubusercontent.com/codecs02-marcher/batocera-tailscale/refs/heads/main/install.sh | bash
+    curl -L https://raw.githubusercontent.com/lp4/batocera-tailscale/refs/heads/main/install.sh | bash
 
 ***If you want exit node and subnet to then use this script.***
 

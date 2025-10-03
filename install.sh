@@ -3,9 +3,18 @@
 set -e
 
 # --- Prompt for Tailscale Auth Key ---
-read -p "Please enter your Tailscale auth key: " TAILSCALE_AUTH_KEY
+# This logic allows the key to be passed as an argument or entered interactively.
+if [ -n "$1" ]; then
+  # Use the first command-line argument as the key
+  TAILSCALE_AUTH_KEY="$1"
+  echo "Using auth key provided as a command-line argument."
+else
+  # Otherwise, prompt the user interactively, reading directly from the terminal
+  read -p "Please enter your Tailscale auth key: " TAILSCALE_AUTH_KEY < /dev/tty
+fi
+
 if [[ -z "$TAILSCALE_AUTH_KEY" ]]; then
-    echo "Error: Auth key cannot be empty. Exiting." >&2
+    echo "Error: Auth key was not provided. Exiting." >&2
     exit 1
 fi
 

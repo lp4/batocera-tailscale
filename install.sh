@@ -1,202 +1,139 @@
 #!/bin/bash
+# Exit immediately if a command exits with a non-zero status.
+set -e
 
-echo "......"
-sleep 2
-echo "............."
-sleep 2
-arch=""
-echo "Running Tailscale install script for subnet route..........."
-sleep 5
-if [[ "$(uname -m)" == "x86_64" ]]; then
-        arch="386"
-fi
-if [[ "$(uname -m)" == "aarch64" ]]; then
-        arch="arm64"
-fi
-if [[ "$(uname -m)" == "aarch32" ]]; then
-        arch="arm"
-fi
-if [[ "$(uname -m)" == "amd64" ]]; then
-        arch="amd64"
-fi
-if [[ "$(uname -m)" == "riscv64" ]]; then
-        arch="riscv64"
-fi
-if [[ "$(uname -m)" == "x86" ]]; then
-        arch="386"
-fi
-if [[ "$(uname -m)" == "armv7l" ]]; then
-        arch="arm"
+# --- Prompt for Tailscale Auth Key ---
+read -p "Please enter your Tailscale auth key: " TAILSCALE_AUTH_KEY
+if [[ -z "$TAILSCALE_AUTH_KEY" ]]; then
+    echo "Error: Auth key cannot be empty. Exiting." >&2
+    exit 1
 fi
 
-sleep 5
+echo "Running Tailscale install script..."
 
-# Finding Architecture.
-
-case ${arch} in
-  386)
-    arch="386"
-    echo "supported tailscale zip $arch"
-    ;;
-  arm64)
-    arch="arm64"
-    echo "supported tailscale zip $arch"
-    ;;
-  arm)
-    arch="arm"
-    echo "supported tailscale zip $arch"
-    ;;
-  amd64)
-    arch="amd64"
-    echo "supported tailscale zip $arch"
-    ;;
-  riscv64)
-    arch="riscv64"
-    echo "supported tailscale zip $arch"
-    ;;
-  386)
-    arch="386"
-    echo "supported tailscale zip $arch"
-    ;;
+# --- 1. Determine System Architecture ---
+echo "Detecting system architecture..."
+case "$(uname -m)" in
+    x86_64)   arch="amd64" ;;
+    aarch64)  arch="arm64" ;;
+    armv7l)   arch="arm" ;;
+    riscv64)  arch="riscv64" ;;
+    i386|i686|x86) arch="386" ;;
+    *)
+      echo "Error: Unsupported architecture '$(uname -m)'." >&2
+      exit 1
+      ;;
 esac
-sleep 5
-batocera-services stop tailscale
-echo "Stopping existing tailscale......."
-sleep 5 
-batocera-services disable tailscale
-echo "Disabling existing tailscale......."
-sleep 5 
-# Creating temp files
-echo "Creating temp files........"
-sleep 5 
+echo "Architecture found: $arch"
+
+# --- 2. Stop and Disable Existing Tailscale Service ---
+echo "Stopping and disabling any existing Tailscale service..."
+batocera-services stop tailscale || true
+batocera-services disable tailscale || true
+
+# --- 3. Download and Install Tailscale ---
+echo "Creating temporary directory for download..."
 rm -rf /userdata/temp
 mkdir -p /userdata/temp
-cd /userdata/temp || exit 1
+cd /userdata/temp
 
-# Dowload tailscale zip as per architecture
-echo "Downloading tailscale for your system........"
-wget -q https://pkgs.tailscale.com/stable/tailscale_1.88.3_$arch.tgz
-sleep 5
-# Exctrating Zip Files
-echo "Extracting Files and Creating Tailscale Folders........"
-sleep 5
-tar -xf tailscale_1.88.3_$arch.tgz
-cd tailscale_1.88.3_$arch || exit 1
+echo "Downloading Tailscale v1.88.3 for your system..."
+wget -q "https://pkgs.tailscale.com/stable/tailscale_1.88.3_${arch}.tgz"
+
+echo "Extracting and installing files..."
+tar -xf "tailscale_1.88.3_${arch}.tgz"
+cd "tailscale_1.88.3_${arch}"
+
 rm -rf /userdata/tailscale
-mkdir /userdata/tailscale
-mv systemd /userdata/tailscale/systemd
-mv tailscale /userdata/tailscale/tailscale
-mv tailscaled /userdata/tailscale/tailscaled
-cd /userdata || exit 1
+mkdir -p /userdata/tailscale
+mv tailscale tailscaled /userdata/tailscale/
+
+echo "Cleaning up temporary files..."
+cd /userdata
 rm -rf /userdata/temp
 
-echo "Configuring Tailscale service......."
-sleep 5
+# --- 4. Configure Tailscale Service for Batocera ---
+echo "Configuring Tailscale service file..."
 mkdir -p /userdata/system/services
-rm -rf /userdata/system/services/tailscale
+# The service file calculates the subnet route dynamically on each start
 cat << 'EOF' > /userdata/system/services/tailscale
 #!/bin/bash
-INTERFACE=$(ip -o -4 route show to default | awk '{print $5}')
 
+# Only run on "start"
+if [[ "$1" != "start" ]]; then
+  exit 0
+fi
+
+# Dynamically find the default interface and its CIDR
+INTERFACE=$(ip -o -4 route show to default | awk '{print $5}')
 if ! ip link show "$INTERFACE" > /dev/null 2>&1; then
-    echo "Error: Interface $INTERFACE does not exist." >&2
+    echo "Error: Default interface $INTERFACE does not exist." >&2
     exit 1
 fi
 
 CIDDR=$(ip -o -f inet addr show "$INTERFACE" | awk '{print $4}')
-
 if [ -z "$CIDDR" ]; then
     echo "Error: No IP address found for interface $INTERFACE." >&2
     exit 1
 fi
 
-IP=$(echo "$CIDDR" | cut -d'/' -f1)
-PREFIX=$(echo "$CIDDR" | cut -d'/' -f2)
-
-MASK=$(( 0xFFFFFFFF << (32 - PREFIX) & 0xFFFFFFFF ))
-MASK_OCTETS=$(printf "%d.%d.%d.%d" $(( (MASK >> 24) & 0xFF )) \
-                                  $(( (MASK >> 16) & 0xFF )) \
-                                  $(( (MASK >> 8) & 0xFF )) \
-                                  $(( MASK & 0xFF )))
-
-IFS=. read -r o1 o2 o3 o4 <<< "$IP"
-IFS=. read -r m1 m2 m3 m4 <<< "$MASK_OCTETS"
-NETWORK=$(printf "%d.%d.%d.%d" $(( o1 & m1 )) \
-                              $(( o2 & m2 )) \
-                              $(( o3 & m3 )) \
-                              $(( o4 & m4 )))
-
-CIDR=$(printf $NETWORK/$PREFIX)
-
-if [[ "$1" != "start" ]]; then
-  exit 0
-fi
-/userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up --advertise-routes=$CIDR --snat-subnet-routes=false --accept-routes
-
+# Start the daemon and bring the connection up
+/userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &
+sleep 2 # Give daemon time to start
+/userdata/tailscale/tailscale up --advertise-routes=$CIDDR --snat-subnet-routes=false --accept-routes
 EOF
-echo "Creating tun, forwarding ip and saving batocera-overlay....."
-sleep 5
-rm -rf /dev/net
+
+# --- 5. Configure System for IP Forwarding ---
+echo "Enabling IP forwarding..."
 mkdir -p /dev/net
 mknod /dev/net/tun c 10 200
 chmod 600 /dev/net/tun
-cp /etc/sysctl.conf /etc/sysctl.conf.bak
+
 cat <<EOL > "/etc/sysctl.conf"
 net.ipv4.ip_forward = 1
 net.ipv6.conf.all.forwarding = 1
 EOL
-
-batocera-save-overlay
-echo "Saving Batocera Overlay"
-sleep 5
 sysctl -p /etc/sysctl.conf
-echo "IP Forwarded Successfully"
-sleep 5
-# Start Tailscale daemon
-echo "Starting Tailscale"
-sleep 5
-/userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
 
+# --- 6. Initial Authentication and Subnet Setup ---
+echo "Starting Tailscale daemon for initial authentication..."
+/userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &
+sleep 2 # Give the daemon a moment to start
 
+# Calculate CIDR for the initial "up" command
+INTERFACE=$(ip -o -4 route show to default | awk '{print $5}')
+CIDDR=$(ip -o -f inet addr show "$INTERFACE" | awk '{print $4}')
+
+echo "Authenticating with Tailscale and advertising subnet route: $CIDDR"
+/userdata/tailscale/tailscale up --authkey="${TAILSCALE_AUTH_KEY}" --advertise-routes=$CIDDR --snat-subnet-routes=false --accept-routes
+
+# --- 7. Apply Network Optimizations (if needed) ---
 NETDEV=$(ip -o route get 8.8.8.8 | cut -f 5 -d " ")
 if dmesg | grep -q "UDP GRO forwarding is suboptimally configured"; then
-    # Disable Generic Receive Offload (GRO) on eth0
+    echo "Applying UDP GRO forwarding fix on $NETDEV..."
     ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
     ethtool -K $NETDEV gro off
-    batocera-save-overlay
-    echo "Fixed UDP GRO forwarding issue on $NETDEV....."
-    sleep 5
-    /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
-    echo "Starting Tailscale Again......"
-    sleep 5
 fi
 
-echo "Working on it........DONE"
-sleep 2
-batocera-services enable tailscale
-echo "Batocera services of tailscale enabled."
-sleep 5
-batocera-services start tailscale
+# --- 8. Finalize and Start Service ---
+echo "Saving system configuration overlay..."
 batocera-save-overlay
-echo "Batocera Started Successfully."
-sleep 5
-echo "Check Tailscale interface and connected ip using command 'ip a'."
-sleep 5
-echo "Running 'ip a' command for you......."
-sleep 5
+
+echo "Enabling and starting Tailscale service..."
+batocera-services enable tailscale
+batocera-services start tailscale
+batocera-save-overlay # Save again to ensure the service is enabled on boot
+
+echo "--------------------------------------------------"
+echo "✅ Tailscale installation and configuration complete!"
+echo "--------------------------------------------------"
+
+echo "Showing current network interfaces..."
+sleep 2
 ip a
-echo "....."
-echo ".........."
-sleep 2
-echo "Above you will see tailscale interface (example: 'tailscale0') below '$NETDEV' and 'tailscale ip'"
-sleep 10
-echo "if 'Yes' then you have successfully configured tailscale in your batocera machine."
-sleep 5
-echo "if 'No' then reboot your machine and run the script again."
-sleep 5
-echo "Go back to tailscale admin console page and click on your newaly added batocera machine and you'll find 'subnets' option waiting to be approved."
-sleep 2
-echo "Approve it, 'Disable Key Expiry' and you are done."
-sleep 2
-echo "Your Welcome....."
-sleep 5
+
+echo
+echo "IMPORTANT: Go to your Tailscale Admin Console."
+echo "1. Find this new machine and approve its subnet route ($CIDDR)."
+echo "2. It is also recommended to 'Disable key expiry' for this machine."
+echo

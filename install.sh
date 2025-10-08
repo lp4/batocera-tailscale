@@ -1,65 +1,205 @@
-#!/bin/sh
+#!/bin/bash
 
-# This script will install the latest version of Tailscale to /userdata/tailscale
-# It automatically detects the system architecture.
+echo "......"
+sleep 2
+echo "............."
+sleep 2
+arch=""
+echo "Running Tailscale install script for subnet route..........."
+sleep 5
+if [[ "$(uname -m)" == "x86_64" ]]; then
+        arch="386"
+fi
+if [[ "$(uname -m)" == "aarch64" ]]; then
+        arch="arm64"
+fi
+if [[ "$(uname -m)" == "aarch32" ]]; then
+        arch="arm"
+fi
+if [[ "$(uname -m)" == "amd64" ]]; then
+        arch="amd64"
+fi
+if [[ "$(uname -m)" == "riscv64" ]]; then
+        arch="riscv64"
+fi
+if [[ "$(uname -m)" == "x86" ]]; then
+        arch="386"
+fi
+if [[ "$(uname -m)" == "armv7l" ]]; then
+        arch="arm"
+fi
 
-# Exit immediately if any command fails
-set -e
+sleep 5
 
-echo "--- Batocera Tailscale Installer ---"
+# Finding Architecture.
 
-# 1. Detect system architecture
-echo "--> Detecting system architecture..."
-case $(uname -m) in
-    x86_64)
-        TS_ARCH="amd64"
-        ;;
-    aarch64)
-        TS_ARCH="arm64"
-        ;;
-    armv7l)
-        TS_ARCH="arm"
-        ;;
-    *)
-        echo "ERROR: Unsupported architecture: $(uname -m)"
-        exit 1
-        ;;
+case ${arch} in
+  386)
+    arch="386"
+    echo "supported tailscale zip $arch"
+    ;;
+  arm64)
+    arch="arm64"
+    echo "supported tailscale zip $arch"
+    ;;
+  arm)
+    arch="arm"
+    echo "supported tailscale zip $arch"
+    ;;
+  amd64)
+    arch="amd64"
+    echo "supported tailscale zip $arch"
+    ;;
+  riscv64)
+    arch="riscv64"
+    echo "supported tailscale zip $arch"
+    ;;
+  386)
+    arch="386"
+    echo "supported tailscale zip $arch"
+    ;;
 esac
-echo "    Architecture detected: ${TS_ARCH}"
+sleep 5
+batocera-services stop tailscale
+echo "Stopping existing tailscale......."
+sleep 5
+batocera-services disable tailscale
+echo "Disabling existing tailscale......."
+sleep 5
+# Creating temp files
+echo "Creating temp files........"
+sleep 5
+rm -rf /userdata/temp
+mkdir -p /userdata/temp
+cd /userdata/temp || exit 1
 
-# 2. Find the latest version of Tailscale from the GitHub API
-echo "--> Finding latest Tailscale version..."
+# Find latest version of Tailscale
+echo "Finding latest Tailscale version........"
 TS_VER=$(curl -s "https://api.github.com/repos/tailscale/tailscale/releases/latest" | grep -oP '"tag_name": "\Kv[^"]+' | sed 's/v//')
+sleep 2
 
-if [ -z "$TS_VER" ]; then
-    echo "ERROR: Could not determine the latest Tailscale version. Check network connection."
+# Dowload tailscale zip as per architecture
+echo "Downloading tailscale for your system........"
+wget -q https://pkgs.tailscale.com/stable/tailscale_${TS_VER}_$arch.tgz
+sleep 5
+# Exctrating Zip Files
+echo "Extracting Files and Creating Tailscale Folders........"
+sleep 5
+tar -xf tailscale_${TS_VER}_$arch.tgz
+cd tailscale_${TS_VER}_$arch || exit 1
+rm -rf /userdata/tailscale
+mkdir /userdata/tailscale
+mv systemd /userdata/tailscale/systemd
+mv tailscale /userdata/tailscale/tailscale
+mv tailscaled /userdata/tailscale/tailscaled
+cd /userdata || exit 1
+rm -rf /userdata/temp
+
+echo "Configuring Tailscale service......."
+sleep 5
+mkdir -p /userdata/system/services
+rm -rf /userdata/system/services/tailscale
+cat << 'EOF' > /userdata/system/services/tailscale
+#!/bin/bash
+INTERFACE=$(ip -o -4 route show to default | awk '{print $5}')
+
+if ! ip link show "$INTERFACE" > /dev/null 2>&1; then
+    echo "Error: Interface $INTERFACE does not exist." >&2
     exit 1
 fi
-echo "    Latest version is: ${TS_VER}"
 
-# 3. Set up the installation directory
-INSTALL_DIR="/userdata/tailscale"
-echo "--> Preparing installation directory: ${INSTALL_DIR}"
-mkdir -p "${INSTALL_DIR}"
+CIDDR=$(ip -o -f inet addr show "$INTERFACE" | awk '{print $4}')
 
-# 4. Download and extract the binaries
-DOWNLOAD_URL="https://pkgs.tailscale.com/stable/tailscale_${TS_VER}_${TS_ARCH}.tgz"
-echo "--> Downloading from ${DOWNLOAD_URL}"
-wget "${DOWNLOAD_URL}" -O /tmp/tailscale.tgz
+if [ -z "$CIDDR" ]; then
+    echo "Error: No IP address found for interface $INTERFACE." >&2
+    exit 1
+fi
 
-echo "--> Extracting files..."
-# The --strip-components=1 flag removes the top-level folder from the tarball
-tar xzf /tmp/tailscale.tgz --strip-components=1 -C "${INSTALL_DIR}"
+IP=$(echo "$CIDDR" | cut -d'/' -f1)
+PREFIX=$(echo "$CIDDR" | cut -d'/' -f2)
 
-# 5. Clean up the downloaded file
-echo "--> Cleaning up..."
-rm /tmp/tailscale.tgz
+MASK=$(( 0xFFFFFFFF << (32 - PREFIX) & 0xFFFFFFFF ))
+MASK_OCTETS=$(printf "%d.%d.%d.%d" $(( (MASK >> 24) & 0xFF )) \
+                                  $(( (MASK >> 16) & 0xFF )) \
+                                  $(( (MASK >> 8) & 0xFF )) \
+                                  $(( MASK & 0xFF )))
 
-echo ""
-echo "✅ Success! Tailscale has been installed to ${INSTALL_DIR}"
-echo ""
-echo "----------------------------------------------------------"
-echo "IMPORTANT: Remember to configure your startup scripts"
-echo "(e.g., /userdata/system/custom.sh and /etc/batocera-boot.conf)"
-echo "to run Tailscale at boot, then reboot your system."
-echo "----------------------------------------------------------"
+IFS=. read -r o1 o2 o3 o4 <<< "$IP"
+IFS=. read -r m1 m2 m3 m4 <<< "$MASK_OCTETS"
+NETWORK=$(printf "%d.%d.%d.%d" $(( o1 & m1 )) \
+                                $(( o2 & m2 )) \
+                                $(( o3 & m3 )) \
+                                $(( o4 & m4 )))
+
+CIDR=$(printf $NETWORK/$PREFIX)
+
+if [[ "$1" != "start" ]]; then
+  exit 0
+fi
+/userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up --advertise-routes=$CIDR --snat-subnet-routes=false --accept-routes
+
+EOF
+echo "Creating tun, forwarding ip and saving batocera-overlay....."
+sleep 5
+rm -rf /dev/net
+mkdir -p /dev/net
+mknod /dev/net/tun c 10 200
+chmod 600 /dev/net/tun
+cp /etc/sysctl.conf /etc/sysctl.conf.bak
+cat <<EOL > "/etc/sysctl.conf"
+net.ipv4.ip_forward = 1
+net.ipv6.conf.all.forwarding = 1
+EOL
+
+batocera-save-overlay
+echo "Saving Batocera Overlay"
+sleep 5
+sysctl -p /etc/sysctl.conf
+echo "IP Forwarded Successfully"
+sleep 5
+# Start Tailscale daemon
+echo "Starting Tailscale"
+sleep 5
+/userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
+
+
+NETDEV=$(ip -o route get 8.8.8.8 | cut -f 5 -d " ")
+if dmesg | grep -q "UDP GRO forwarding is suboptimally configured"; then
+    # Disable Generic Receive Offload (GRO) on eth0
+    ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
+    ethtool -K $NETDEV gro off
+    batocera-save-overlay
+    echo "Fixed UDP GRO forwarding issue on $NETDEV....."
+    sleep 5
+    /userdata/tailscale/tailscaled -state /userdata/tailscale/state > /userdata/tailscale/tailscaled.log 2>&1 &/userdata/tailscale/tailscale up
+    echo "Starting Tailscale Again......"
+    sleep 5
+fi
+
+echo "Working on it........DONE"
+sleep 2
+batocera-services enable tailscale
+echo "Batocera services of tailscale enabled."
+sleep 5
+batocera-services start tailscale
+batocera-save-overlay
+echo "Batocera Started Successfully."
+sleep 5
+echo "Check Tailscale interface and connected ip using command 'ip a'."
+sleep 5
+echo "Running 'ip a' command for you......."
+sleep 5
+ip a
+echo "....."
+echo ".........."
+sleep 2
+echo "Above you will see tailscale interface (example: 'tailscale0') below '$NETDEV' and 'tailscale ip'"
+sleep 5
+echo "if 'Yes' then you have successfully configured tailscale in your batocera machine."
+sleep 2
+echo "if 'No' then reboot your machine and run the script again."
+sleep 2
+echo "Go back to tailscale admin console page and click on your newaly added batocera machine and you'll find 'subnets' option waiting to be approved."
+sleep 1
+echo "Approve it, 'Disable Key Expiry' and you are done."
+sleep 2

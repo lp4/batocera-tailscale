@@ -1,5 +1,11 @@
 # Batocera-Tailscale....
 
+***Changes in this fork:***
+
+***install.sh script automatically checks for the latest code before installing. Everything else is the same.***
+
+**----------**
+
 **Access you batocera machine from anywhere in the world or use it as a vpn server.**
 
 **Run Tailscale in batocera with Subnet, Accept Routes and Exit node. Tailscale starts at boot.**
